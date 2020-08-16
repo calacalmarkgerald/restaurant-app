@@ -16,6 +16,13 @@ service: restaurant-app
 #app: your-app-name
 #org: your-org-name
 
+# Create an optimized package for our functions
+package:
+  individually: true
+
+plugins:
+  - serverless-bundle # Package our functions with Webpack
+
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
@@ -23,6 +30,7 @@ service: restaurant-app
 provider:
   name: aws
   runtime: nodejs12.x
+  versionFunctions: false
 
   # you can overwrite defaults here
   #  stage: dev
