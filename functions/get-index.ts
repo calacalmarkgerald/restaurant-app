@@ -169,6 +169,7 @@ const getRestaurants = async (): Promise<[]> => {
  * @param {Context} context
  * @returns {Promise<APIGatewayProxyResult>}
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const handler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
   try {
     const template = loadHtml();

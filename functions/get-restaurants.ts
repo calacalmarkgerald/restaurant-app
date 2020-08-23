@@ -39,6 +39,7 @@ export const getRestaurants = async (count: number, client: DocumentClient, tabl
  * @param {Context} context
  * @returns {Promise<APIGatewayProxyResult>}
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const handler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
   if (!tableName) {
     throw new Error('Table name is undefined');
