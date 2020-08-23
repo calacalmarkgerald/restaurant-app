@@ -79,6 +79,8 @@ functions:
           - - 'https://'
             - Ref: ApiGatewayRestApi
             - '.execute-api.${opt:region, self:provider.region}.amazonaws.com/${opt:stage, self:provider.stage}/restaurants'
+      cognito_user_pool_id: ap-southeast-1_wkUphRxYu
+      cognito_client_id: 54ie6gk7j03odq2hd7pgc3k2ka
   get-restaurants:
     handler: functions/get-restaurants.handler
     events:
@@ -94,6 +96,8 @@ functions:
       - http:
           path: /restaurants/search
           method: post
+          authorizer:
+            arn: arn:aws:cognito-idp:#{AWS::Region}:#{AWS::AccountId}:userpool/ap-southeast-1_wkUphRxYu
     environment:
       restaurants_table: restaurants-calacalm
 #    The following are a few example events you can configure
