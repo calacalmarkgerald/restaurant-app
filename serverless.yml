@@ -22,6 +22,7 @@ package:
 
 plugins:
   - serverless-bundle # Package our functions with Webpack
+  - serverless-pseudo-parameters
 
 custom:
   bundle:
@@ -47,6 +48,9 @@ provider:
         Fn::GetAtt:
           - restaurantsTable
           - Arn
+    - Effect: Allow
+      Action: execute-api:Invoke
+      Resource: arn:aws:execute-api:#{AWS::Region}:#{AWS::AccountId}:*/*/GET/restaurants
 
 # you can define service wide environment variables here
 #  environment:
@@ -81,6 +85,7 @@ functions:
       - http:
           path: /restaurants/
           method: get
+          authorizer: aws_iam
     environment:
       restaurants_table: restaurants-calacalm
 #    The following are a few example events you can configure

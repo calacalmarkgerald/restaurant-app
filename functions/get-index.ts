@@ -1,6 +1,8 @@
 import fs from 'fs';
-import fetch, { RequestInfo } from 'node-fetch';
+import fetch from 'node-fetch';
 import mustache from 'mustache';
+import aws4 from 'aws4';
+import url from 'url';
 import { APIGatewayEvent, Context, APIGatewayProxyResult } from 'aws-lambda';
 
 const restaurantsApiRoot = process.env.restaurants_api;
@@ -151,8 +153,24 @@ function loadHtml(): string {
  */
 const getRestaurants = async (): Promise<[]> => {
   let data = [];
+  const apiURL = url.parse(restaurantsApiRoot as string);
+  const opts = {
+    host: apiURL.hostname,
+    path: apiURL.pathname,
+    headers: {} as Record<string, string>,
+  };
+
+  aws4.sign(opts);
+
   try {
-    const response = await fetch(restaurantsApiRoot as RequestInfo);
+    const response = await fetch(restaurantsApiRoot as string, {
+      headers: {
+        Host: opts.headers['Host'],
+        Authorization: opts.headers['Authorization'],
+        'X-Amz-Date': opts.headers['X-Amz-Date'],
+        'X-Amz-Security-Token': opts.headers['X-Amz-Security-Token'],
+      },
+    });
     data = (await response.json()) as [];
   } catch (error) {
     console.error(error);
