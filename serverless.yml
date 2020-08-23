@@ -88,6 +88,14 @@ functions:
           authorizer: aws_iam
     environment:
       restaurants_table: restaurants-calacalm
+  search-restaurants:
+    handler: functions/search-restaurants.handler
+    events:
+      - http:
+          path: /restaurants/search
+          method: post
+    environment:
+      restaurants_table: restaurants-calacalm
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
