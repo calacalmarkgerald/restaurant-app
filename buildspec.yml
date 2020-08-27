@@ -1,0 +1,11 @@
+version: 1.0
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 12
+  build:
+    commands:
+      - npm install
+      - npm test
+      - npm run sls -- deploy -s $STAGE -r $REGION
