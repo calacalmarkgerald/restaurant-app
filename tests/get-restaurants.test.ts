@@ -40,9 +40,19 @@ describe('Get Restaurants Function tests', () => {
     expect(data.length).toEqual(3);
     expect(data).toStrictEqual([
       {
-        name: 'Krusty Krab',
-        image: 'https://d2qt42rcwzspd6.cloudfront.net/manning/krusty-krab.png',
-        themes: ['Cartoon', 'Spongebob'],
+        name: 'Fangtasia',
+        image: 'https://d2qt42rcwzspd6.cloudfront.net/manning/fangtasia.png',
+        themes: ['true blood'],
+      },
+      {
+        name: "Shoney's",
+        image: "https://d2qt42rcwzspd6.cloudfront.net/manning/shoney's.png",
+        themes: ['cartoon', 'rick and morty'],
+      },
+      {
+        name: "Freddy's BBQ Joint",
+        image: "https://d2qt42rcwzspd6.cloudfront.net/manning/freddy's+bbq+joint.png",
+        themes: ['netflix', 'house of cards'],
       },
     ]);
   });
