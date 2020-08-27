@@ -67,7 +67,7 @@ provider:
 
 functions:
   get-index:
-    handler: functions/get-index.handler
+    handler: src/get-index/index.handler
     events:
       - http:
           path: /
@@ -82,7 +82,7 @@ functions:
       cognito_user_pool_id: ap-southeast-1_wkUphRxYu
       cognito_client_id: 54ie6gk7j03odq2hd7pgc3k2ka
   get-restaurants:
-    handler: functions/get-restaurants.handler
+    handler: src/get-restaurants/index.handler
     events:
       - http:
           path: /restaurants/
@@ -91,7 +91,7 @@ functions:
     environment:
       restaurants_table: restaurants-calacalm
   search-restaurants:
-    handler: functions/search-restaurants.handler
+    handler: src/search-restaurants/index.handler
     events:
       - http:
           path: /restaurants/search
