@@ -11,7 +11,7 @@ const defaultResults: number = parseInt(process.env.defaultResults!) || 8;
  * @param {number} count
  * @param {string} theme
  */
-const findRestaurantsbyTheme = async (
+export const findRestaurantsbyTheme = async (
   count: number,
   theme: string,
   client: DocumentClient,

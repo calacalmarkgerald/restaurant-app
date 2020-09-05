@@ -2,7 +2,7 @@ import * as AWSMock from 'aws-sdk-mock';
 import * as AWS from 'aws-sdk';
 
 import { getRestaurants } from '../src/get-restaurants';
-import { QueryInput } from 'aws-sdk/clients/dynamodb';
+import DynamoDB, { QueryInput } from 'aws-sdk/clients/dynamodb';
 
 describe('Get Restaurants Function tests', () => {
   beforeEach(() => {
@@ -33,8 +33,8 @@ describe('Get Restaurants Function tests', () => {
       });
     });
 
-    const client = new AWS.DynamoDB.DocumentClient();
-    const data = await getRestaurants(3, client, 'restaurant-calacalm');
+    const client = new DynamoDB.DocumentClient();
+    const data = await getRestaurants(3, client, 'restaurant-table');
 
     expect(data).toBeInstanceOf(Array);
     expect(data.length).toEqual(3);

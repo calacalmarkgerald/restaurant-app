@@ -7,12 +7,13 @@
 */
 
 import { v4 as uuid } from 'uuid';
-import DynamoDB, { DocumentClient, PutItemInputAttributeMap } from 'aws-sdk/clients/dynamodb';
+import DynamoDB, { DocumentClient, PutItemInputAttributeMap, AttributeMap } from 'aws-sdk/clients/dynamodb';
 import { getCredentials } from './helpers/credentials-helper';
 import { getDbInstace, createTable, deleteTable, insertData } from './helpers/dynamodb-helper';
 import { wait } from './helpers/timeout-helper';
 
 import { getRestaurants } from '../src/get-restaurants';
+import { findRestaurantsbyTheme } from '../src/search-restaurants';
 
 const tableName = process.env.DYNAMODB_TABLE ? process.env.DYNAMODB_TABLE : `restaurants-${uuid()}`;
 const queryTimeout: number = process.env.QUERY_TIMEOUT ? parseInt(process.env.QUERY_TIMEOUT, 10) : 200;
@@ -20,6 +21,24 @@ const queryTimeout: number = process.env.QUERY_TIMEOUT ? parseInt(process.env.QU
 let dynamoDb: DynamoDB, documentClient: DocumentClient;
 
 describe('restaurant app integration', () => {
+  const restaurants = [
+    {
+      name: 'Fangtasia',
+      image: 'https://d2qt42rcwzspd6.cloudfront.net/manning/fangtasia.png',
+      themes: ['true blood'],
+    },
+    {
+      name: "Shoney's",
+      image: "https://d2qt42rcwzspd6.cloudfront.net/manning/shoney's.png",
+      themes: ['cartoon', 'rick and morty'],
+    },
+    {
+      name: "Freddy's BBQ Joint",
+      image: "https://d2qt42rcwzspd6.cloudfront.net/manning/freddy's+bbq+joint.png",
+      themes: ['netflix', 'house of cards'],
+    },
+  ];
+
   beforeAll(async () => {
     let credentials;
     if (process.env.LOYALTY_INTEG_ROLE !== undefined) {
@@ -29,9 +48,14 @@ describe('restaurant app integration', () => {
     dynamoDb = await getDbInstace(credentials);
     documentClient = new DocumentClient(credentials);
     if (!process.env.DYNAMODB_TABLE) {
-      return await createTable(tableName, dynamoDb);
+      await createTable(tableName, dynamoDb);
     }
 
+    await Promise.all(
+      restaurants.map((data) => insertData(tableName, data as PutItemInputAttributeMap, documentClient)),
+    );
+
+    await wait(queryTimeout); //This is to give time for GSI to be updated with eventual consistency
     return Promise.resolve();
   }, 90000); // Increase the timeout for `beforeAll` to 90s, because creating table takes time
 
@@ -43,35 +67,22 @@ describe('restaurant app integration', () => {
 
   describe('get-restaurants', () => {
     test('should return an array of 3 restaurants', async () => {
-      const restaurants = [
-        {
-          name: 'Fangtasia',
-          image: 'https://d2qt42rcwzspd6.cloudfront.net/manning/fangtasia.png',
-          themes: ['true blood'],
-        },
-        {
-          name: "Shoney's",
-          image: "https://d2qt42rcwzspd6.cloudfront.net/manning/shoney's.png",
-          themes: ['cartoon', 'rick and morty'],
-        },
-        {
-          name: "Freddy's BBQ Joint",
-          image: "https://d2qt42rcwzspd6.cloudfront.net/manning/freddy's+bbq+joint.png",
-          themes: ['netflix', 'house of cards'],
-        },
-      ];
-
-      await Promise.all(
-        restaurants.map((data) => insertData(tableName, data as PutItemInputAttributeMap, documentClient)),
-      );
-
-      await wait(queryTimeout);
-
       const data = await getRestaurants(3, documentClient, tableName);
 
       expect(data).toBeInstanceOf(Array);
       expect(data.length).toEqual(3);
       expect(data).toStrictEqual(restaurants);
+    });
+  });
+
+  describe('search-restaurants', () => {
+    test('should return an array of 1 retaurant that have a cartoon theme', async () => {
+      const data = await findRestaurantsbyTheme(3, 'cartoon', documentClient, tableName);
+
+      expect(data).toBeInstanceOf(Array);
+      expect(data.length).toEqual(1);
+      expect(data[0].themes).toContain('cartoon');
+      expect(data).toStrictEqual(restaurants.filter((restaurant) => restaurant.themes.includes('cartoon')));
     });
   });
 });
