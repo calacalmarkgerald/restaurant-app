@@ -79,8 +79,8 @@ functions:
           - - 'https://'
             - Ref: ApiGatewayRestApi
             - '.execute-api.${opt:region, self:provider.region}.amazonaws.com/${opt:stage, self:provider.stage}/restaurants'
-      cognito_user_pool_id: ap-southeast-1_wkUphRxYu
-      cognito_client_id: 54ie6gk7j03odq2hd7pgc3k2ka
+      cognito_user_pool_id: ${ssm:/${self:service}/${opt:stage, self:provider.stage}/cognito_user_pool_id}
+      cognito_client_id: ${ssm:/${self:service}/${opt:stage, self:provider.stage}/cognito_web_client_id}
   get-restaurants:
     handler: src/get-restaurants/index.handler
     events:
@@ -89,7 +89,7 @@ functions:
           method: get
           authorizer: aws_iam
     environment:
-      restaurants_table: restaurants-calacalm
+      restaurants_table: ${ssm:/${self:service}/${opt:stage, self:provider.stage}/table_name}
   search-restaurants:
     handler: src/search-restaurants/index.handler
     events:
@@ -97,9 +97,9 @@ functions:
           path: /restaurants/search
           method: post
           authorizer:
-            arn: arn:aws:cognito-idp:#{AWS::Region}:#{AWS::AccountId}:userpool/ap-southeast-1_wkUphRxYu
+            arn: arn:aws:cognito-idp:#{AWS::Region}:#{AWS::AccountId}:userpool/${ssm:/${self:service}/${opt:stage, self:provider.stage}/cognito_user_pool_id}
     environment:
-      restaurants_table: restaurants-calacalm
+      restaurants_table: ${ssm:/${self:service}/${opt:stage, self:provider.stage}/table_name}
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -146,7 +146,7 @@ resources:
     restaurantsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: restaurants-calacalm
+        TableName: ${ssm:/${self:service}/${opt:stage, self:provider.stage}/table_name}
         AttributeDefinitions:
           - AttributeName: name
             AttributeType: S
