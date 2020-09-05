@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { config, DynamoDB } from 'aws-sdk';
+import { config, DynamoDB, SSM } from 'aws-sdk';
 import {
   BatchWriteItemInput,
   WriteRequests,
@@ -7,9 +7,12 @@ import {
   WriteRequest,
   PutRequest,
 } from 'aws-sdk/clients/dynamodb';
+import { GetParameterRequest } from 'aws-sdk/clients/ssm';
 
-config.region = 'ap-southeast-1';
+const { REGION, STAGE } = process.env;
+config.region = REGION;
 const client: DynamoDB.DocumentClient = new DynamoDB.DocumentClient();
+const ssm = new SSM();
 
 const restaurants = [
   {
@@ -54,22 +57,34 @@ const restaurants = [
   },
 ];
 
-const putReqs: WriteRequests = restaurants.map((x) => {
-  return {
-    PutRequest: {
-      Item: x as PutItemInputAttributeMap,
-    } as PutRequest,
-  } as WriteRequest;
-});
+const getTableName = async (): Promise<string> => {
+  const params: GetParameterRequest = {
+    Name: `/restaurant-app/${STAGE}/table_name`,
+  };
 
-const req: BatchWriteItemInput = {
-  RequestItems: {
-    'restaurants-calacalm': putReqs,
-  },
+  const ssmResponse = await ssm.getParameter(params).promise();
+  return ssmResponse.Parameter!.Value!;
 };
 
-client
-  .batchWrite(req)
-  .promise()
+const run = async (): Promise<void> => {
+  const tableName = await getTableName();
+  const putReqs: WriteRequests = restaurants.map((x) => {
+    return {
+      PutRequest: {
+        Item: x as PutItemInputAttributeMap,
+      } as PutRequest,
+    } as WriteRequest;
+  });
+
+  const req: BatchWriteItemInput = {
+    RequestItems: {
+      [tableName]: putReqs,
+    },
+  };
+
+  await client.batchWrite(req).promise();
+};
+
+run()
   .then(() => console.log('all done'))
-  .catch((error) => console.error(error));
+  .catch((error) => console.log(error));
