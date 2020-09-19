@@ -2,16 +2,20 @@ import * as AWSMock from 'aws-sdk-mock';
 import * as AWS from 'aws-sdk';
 
 import { findRestaurantsbyTheme } from '../src/search-restaurants';
-import DynamoDB, { QueryInput } from 'aws-sdk/clients/dynamodb';
+import { ScanInput } from 'aws-sdk/clients/dynamodb';
 
 describe('Search Restaurants Function tests', () => {
   beforeEach(() => {
     jest.resetModules();
   });
 
+  afterEach(() => {
+    AWSMock.restore();
+  });
+
   test('should return items that have the theme : "cartoon"', async () => {
     AWSMock.setSDKInstance(AWS);
-    AWSMock.mock('DynamoDB.DocumentClient', 'scan', (params: QueryInput, callback: Function) => {
+    AWSMock.mock('DynamoDB.DocumentClient', 'scan', (params: ScanInput, callback: Function) => {
       callback(null, {
         Items: [
           {
@@ -23,7 +27,7 @@ describe('Search Restaurants Function tests', () => {
       });
     });
 
-    const client = new DynamoDB.DocumentClient();
+    const client = new AWS.DynamoDB.DocumentClient();
     const data = await findRestaurantsbyTheme(3, 'cartoon', client, 'restaurant-table');
 
     expect(data).toBeInstanceOf(Array);

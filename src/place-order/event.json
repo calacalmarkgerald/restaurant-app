@@ -1,0 +1,10 @@
+{
+  "body": "{\"restaurantName\": \"Jollibee\"}",
+  "requestContext": {
+    "authorizer": {
+      "claims": {
+        "email": "juandelacruz@gmail.com"
+      }
+    }
+  }
+}

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "sls": "serverless",
-    "seed:restaurants": "ts-node seed-restaurant.ts",
+    "seed:restaurants": "STAGE=dev REGION=ap-southeast-1 ts-node seed-restaurant.ts",
     "test": "serverless-bundle test",
     "test:local": "AWS_PROFILE=default AWS_REGION=ap-southeast-1 serverless-bundle test",
     "test:watch": "serverless-bundle test --watch"

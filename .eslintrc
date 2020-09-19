@@ -11,7 +11,7 @@
     "plugin:@typescript-eslint/recommended"
   ],
   "rules": {
-    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-console": "off",
     "@typescript-eslint/no-non-null-assertion": "off"
   }
 }

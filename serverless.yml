@@ -51,6 +51,12 @@ provider:
     - Effect: Allow
       Action: execute-api:Invoke
       Resource: arn:aws:execute-api:#{AWS::Region}:#{AWS::AccountId}:*/*/GET/restaurants
+    - Effect: Allow
+      Action: kinesis:PutRecord
+      Resource:
+        Fn::GetAtt:
+          - orderEventsStream
+          - Arn
 
 # you can define service wide environment variables here
 #  environment:
@@ -100,6 +106,16 @@ functions:
             arn: arn:aws:cognito-idp:#{AWS::Region}:#{AWS::AccountId}:userpool/${ssm:/${self:service}/${opt:stage, self:provider.stage}/cognito_user_pool_id}
     environment:
       restaurants_table: ${ssm:/${self:service}/${opt:stage, self:provider.stage}/table_name}
+  place-order:
+    handler: src/place-order/index.handler
+    events:
+      - http:
+          path: /orders
+          method: post
+          authorizer:
+            arn: arn:aws:cognito-idp:#{AWS::Region}:#{AWS::AccountId}:userpool/${ssm:/${self:service}/${opt:stage, self:provider.stage}/cognito_user_pool_id}
+    environment:
+      order_events_stream: ${ssm:/${self:service}/${opt:stage, self:provider.stage}/stream_name}
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -156,3 +172,8 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    orderEventsStream:
+      Type: AWS::Kinesis::Stream
+      Properties:
+        Name: ${ssm:/${self:service}/${opt:stage, self:provider.stage}/stream_name}
+        ShardCount: 1

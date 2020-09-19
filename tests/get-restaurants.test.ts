@@ -2,16 +2,20 @@ import * as AWSMock from 'aws-sdk-mock';
 import * as AWS from 'aws-sdk';
 
 import { getRestaurants } from '../src/get-restaurants';
-import DynamoDB, { QueryInput } from 'aws-sdk/clients/dynamodb';
+import { ScanInput } from 'aws-sdk/clients/dynamodb';
 
 describe('Get Restaurants Function tests', () => {
   beforeEach(() => {
     jest.resetModules();
   });
 
+  afterEach(() => {
+    AWSMock.restore();
+  });
+
   test('should return an array of 3 restaurants', async () => {
     AWSMock.setSDKInstance(AWS);
-    AWSMock.mock('DynamoDB.DocumentClient', 'scan', (params: QueryInput, callback: Function) => {
+    AWSMock.mock('DynamoDB.DocumentClient', 'scan', (params: ScanInput, callback: Function) => {
       callback(null, {
         Items: [
           {
@@ -33,7 +37,7 @@ describe('Get Restaurants Function tests', () => {
       });
     });
 
-    const client = new DynamoDB.DocumentClient();
+    const client = new AWS.DynamoDB.DocumentClient();
     const data = await getRestaurants(3, client, 'restaurant-table');
 
     expect(data).toBeInstanceOf(Array);

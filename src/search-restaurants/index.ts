@@ -14,7 +14,7 @@ const defaultResults: number = parseInt(process.env.defaultResults!) || 8;
 export const findRestaurantsbyTheme = async (
   count: number,
   theme: string,
-  client: DocumentClient,
+  client: DynamoDB.DocumentClient,
   tableName: string,
 ): Promise<ItemList> => {
   let items: ItemList = [];
