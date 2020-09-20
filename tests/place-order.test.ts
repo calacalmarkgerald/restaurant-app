@@ -33,7 +33,8 @@ describe('Place Order Function tests', () => {
     const kinesis = new AWS.Kinesis();
     const data = await placeOrder(order, kinesis, 'order-stream');
 
-    expect(data).toEqual('21269319989653637946712965403778482177');
+    expect(data.shardId).toEqual('shardId-000000000001');
+    expect(data.sequenceNumber).toEqual('21269319989653637946712965403778482177');
   });
 
   test('should throw unauthorized error when user email is empty', () => {

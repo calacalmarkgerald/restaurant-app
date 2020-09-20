@@ -13,6 +13,13 @@ export interface Order {
   userEmail: string;
   restaurantName: string;
 }
+/**
+ * Order stream data interface
+ */
+export interface OrderStreamData {
+  shardId: string;
+  sequenceNumber: string;
+}
 
 /**
  * Custom error for unauthorized exception
@@ -30,7 +37,7 @@ export class UnauthorizedError extends Error {
  * @param {Kinesis} kinesis
  * @param {string} streamName
  */
-export const placeOrder = async (order: Order, kinesis: Kinesis, streamName: string): Promise<string> => {
+export const placeOrder = async (order: Order, kinesis: Kinesis, streamName: string): Promise<OrderStreamData> => {
   if (!order.userEmail) {
     throw new UnauthorizedError('No user email was provided.');
   }
@@ -45,7 +52,7 @@ export const placeOrder = async (order: Order, kinesis: Kinesis, streamName: str
     const data = await kinesis.putRecord(params).promise();
     console.log(`published 'order_placed' event into Kinesis`);
 
-    return data.SequenceNumber;
+    return { shardId: data.ShardId, sequenceNumber: data.SequenceNumber };
   } catch (error) {
     console.error(error);
     throw new Error('Unable to put record into kinesis stream');
