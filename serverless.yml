@@ -85,6 +85,12 @@ functions:
           - - 'https://'
             - Ref: ApiGatewayRestApi
             - '.execute-api.${opt:region, self:provider.region}.amazonaws.com/${opt:stage, self:provider.stage}/restaurants'
+      place_order_api:
+        Fn::Join:
+          - ''
+          - - 'https://'
+            - Ref: ApiGatewayRestApi
+            - '.execute-api.${opt:region, self:provider.region}.amazonaws.com/${opt:stage, self:provider.stage}/orders'
       cognito_user_pool_id: ${ssm:/${self:service}/${opt:stage, self:provider.stage}/cognito_user_pool_id}
       cognito_client_id: ${ssm:/${self:service}/${opt:stage, self:provider.stage}/cognito_web_client_id}
   get-restaurants:

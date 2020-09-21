@@ -6,6 +6,7 @@ import url from 'url';
 import { APIGatewayEvent, Context, APIGatewayProxyResult } from 'aws-lambda';
 
 const restaurantsApiRoot = process.env.restaurants_api!;
+const placeOrderApiRoot = process.env.place_order_api!;
 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 const awsRegion = process.env.AWS_REGION!;
@@ -16,23 +17,19 @@ let html = `
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
     <title>Big Mouth</title>
 
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.149.0.min.js"></script>
     <script src="https://d2qt42rcwzspd6.cloudfront.net/manning/aws-cognito-sdk.min.js"></script>
     <script src="https://d2qt42rcwzspd6.cloudfront.net/manning/amazon-cognito-identity.min.js"></script>
-    <script
-      src="https://code.jquery.com/jquery-3.2.1.min.js"
-      integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
-      integrity="sha384-Dziy8F2VlJQLMShA6FHWNul/veM9bCkRUaLqr199K94ntO5QUrLJBEbYegdSkkqX"
-      crossorigin="anonymous"
-    ></script>
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" 
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" 
+            integrity="sha384-Dziy8F2VlJQLMShA6FHWNul/veM9bCkRUaLqr199K94ntO5QUrLJBEbYegdSkkqX" 
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
     <style>
       .fullscreenDiv {
@@ -42,7 +39,7 @@ let html = `
         bottom: 0px;
         top: 0px;
         left: 0;
-        position: absolute;
+        position: absolute;        
       }
       .restaurantsDiv {
         background-color: #ffffff;
@@ -59,7 +56,7 @@ let html = `
       }
       .column-container {
         padding: 0;
-        margin: 0;
+        margin: 0;        
         list-style: none;
         display: flex;
         flex-flow: column;
@@ -99,7 +96,7 @@ let html = `
       }
       .restaurant-name {
         font-size: 24px;
-        font-family: Arial, Helvetica, sans-serif;
+        font-family:Arial, Helvetica, sans-serif;
         color: #ffffff;
         padding: 10px;
         margin: 0px;
@@ -127,19 +124,18 @@ let html = `
         display: none;
       }
 
-      lable,
-      button,
-      input {
-        display: block;
+      lable, button, input {
+        display:block;
         font-family: Arial, Helvetica, sans-serif;
         font-size: 18px;
       }
-
-      fieldset {
-        padding: 0;
-        border: 0;
-        margin-top: 25px;
+      
+      fieldset { 
+        padding:0; 
+        border:0; 
+        margin-top:25px; 
       }
+
     </style>
 
     <script>
@@ -147,6 +143,7 @@ let html = `
       const COGNITO_USER_POOL_ID = '{{cognitoUserPoolId}}';
       const CLIENT_ID = '{{cognitoClientId}}';
       const SEARCH_URL = '{{& searchUrl}}';
+      const PLACE_ORDER_URL = '{{& placeOrderUrl}}';
 
       var regDialog, regForm;
       var verifyDialog;
@@ -155,15 +152,15 @@ let html = `
       var userPool, cognitoUser;
       var idToken;
 
-      function toggleSignOut(enable) {
+      function toggleSignOut (enable) {
         enable === true ? $('#sign-out').show() : $('#sign-out').hide();
       }
 
-      function toggleSignIn(enable) {
+      function toggleSignIn (enable) {
         enable === true ? $('#sign-in').show() : $('#sign-in').hide();
       }
 
-      function toggleRegister(enable) {
+      function toggleRegister (enable) {
         enable === true ? $('#register').show() : $('#register').hide();
       }
 
@@ -171,18 +168,18 @@ let html = `
         AWS.config.region = AWS_REGION;
         AWSCognito.config.region = AWS_REGION;
 
-        var data = {
-          UserPoolId: COGNITO_USER_POOL_ID,
-          ClientId: CLIENT_ID,
+        var data = { 
+          UserPoolId : COGNITO_USER_POOL_ID, 
+          ClientId : CLIENT_ID
         };
         userPool = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserPool(data);
         cognitoUser = userPool.getCurrentUser();
 
-        if (cognitoUser != null) {
-          cognitoUser.getSession(function (err, session) {
+        if (cognitoUser != null) {          
+          cognitoUser.getSession(function(err, session) {
             if (err) {
-              alert(err);
-              return;
+                alert(err);
+                return;
             }
 
             idToken = session.idToken.jwtToken;
@@ -201,28 +198,25 @@ let html = `
       }
 
       function addUser() {
-        var firstName = $('#first-name')[0].value;
-        var lastName = $('#last-name')[0].value;
-        var username = $('#username')[0].value;
-        var password = $('#password')[0].value;
-        var email = $('#email')[0].value;
+        var firstName = $("#first-name")[0].value;
+        var lastName = $("#last-name")[0].value;
+        var username = $("#username")[0].value;
+        var password = $("#password")[0].value;
+        var email = $("#email")[0].value;
 
         var attributeList = [
-          new AWSCognito.CognitoIdentityServiceProvider.CognitoUserAttribute({
-            Name: 'email',
-            Value: email,
+          new AWSCognito.CognitoIdentityServiceProvider.CognitoUserAttribute({ 
+            Name : 'email', Value : email
           }),
-          new AWSCognito.CognitoIdentityServiceProvider.CognitoUserAttribute({
-            Name: 'given_name',
-            Value: firstName,
+          new AWSCognito.CognitoIdentityServiceProvider.CognitoUserAttribute({ 
+            Name : 'given_name', Value : firstName
           }),
-          new AWSCognito.CognitoIdentityServiceProvider.CognitoUserAttribute({
-            Name: 'family_name',
-            Value: lastName,
+          new AWSCognito.CognitoIdentityServiceProvider.CognitoUserAttribute({ 
+            Name : 'family_name', Value : lastName
           }),
         ];
 
-        userPool.signUp(username, password, attributeList, null, function (err, result) {
+        userPool.signUp(username, password, attributeList, null, function(err, result){
           if (err) {
             alert(err);
             return;
@@ -230,39 +224,37 @@ let html = `
           cognitoUser = result.user;
           console.log('user name is ' + cognitoUser.getUsername());
 
-          regDialog.dialog('close');
-          verifyDialog.dialog('open');
+          regDialog.dialog("close");
+          verifyDialog.dialog("open");
         });
       }
 
       function confirmUser() {
-        var verificationCode = $('#verification-code')[0].value;
-        cognitoUser.confirmRegistration(verificationCode, true, function (err, result) {
+        var verificationCode = $("#verification-code")[0].value;
+        cognitoUser.confirmRegistration(verificationCode, true, function(err, result) {
           if (err) {
             alert(err);
             return;
           }
           console.log('verification call result: ' + result);
 
-          verifyDialog.dialog('close');
-          regCompleteDialog.dialog('open');
+          verifyDialog.dialog("close");
+          regCompleteDialog.dialog("open");
         });
       }
 
       function authenticateUser() {
-        var username = $('#sign-in-username')[0].value;
-        var password = $('#sign-in-password')[0].value;
+        var username = $("#sign-in-username")[0].value;
+        var password = $("#sign-in-password")[0].value;
 
         var authenticationData = {
-          Username: username,
-          Password: password,
+          Username : username,
+          Password : password,
         };
-        var authenticationDetails = new AWSCognito.CognitoIdentityServiceProvider.AuthenticationDetails(
-          authenticationData
-        );
+        var authenticationDetails = new AWSCognito.CognitoIdentityServiceProvider.AuthenticationDetails(authenticationData);
         var userData = {
-          Username: username,
-          Pool: userPool,
+          Username : username,
+          Pool : userPool
         };
         var cognitoUser = new AWSCognito.CognitoIdentityServiceProvider.CognitoUser(userData);
 
@@ -273,15 +265,15 @@ let html = `
             idToken = result.idToken.jwtToken;
             console.log('idToken : ' + idToken);
 
-            signInDialog.dialog('close');
+            signInDialog.dialog("close");
             toggleRegister(false);
             toggleSignIn(false);
             toggleSignOut(true);
           },
 
-          onFailure: function (err) {
+          onFailure: function(err) {
             alert(err);
-          },
+          }
         });
       }
 
@@ -295,18 +287,18 @@ let html = `
       }
 
       function searchRestaurants() {
-        var theme = $('#theme')[0].value;
+        var theme = $("#theme")[0].value;
 
         var xhr = new XMLHttpRequest();
         xhr.open('POST', SEARCH_URL, true);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.setRequestHeader('Authorization', idToken);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Authorization", idToken);
         xhr.send(JSON.stringify({ theme }));
-
+        
         xhr.onreadystatechange = function (e) {
           if (xhr.readyState === 4 && xhr.status === 200) {
             var restaurants = JSON.parse(xhr.responseText);
-            var restaurantsList = $('#restaurantsUl');
+            var restaurantsList = $("#restaurantsUl");
             restaurantsList.empty();
 
             for (var restaurant of restaurants) {
@@ -318,84 +310,102 @@ let html = `
                   '"></li></ul></li>'
               );
             }
+
           } else if (xhr.readyState === 4) {
             alert(xhr.responseText);
           }
         };
       }
 
-      $(document).ready(function () {
-        regDialog = $('#reg-dialog-form').dialog({
+      function placeOrder(restaurantName) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', PLACE_ORDER_URL, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Authorization", idToken);
+        xhr.send(JSON.stringify({ restaurantName }));
+
+        xhr.onreadystatechange = function (e) {
+          if (xhr.readyState === 4 && xhr.status === 200) {
+            alert("your order has been placed, we'll let you know once it's been accepted by the restaurant!");
+          } else if (xhr.readyState === 4) {
+            alert(xhr.responseText);
+          }
+        };
+      }
+
+      $(document).ready(function() {
+        regDialog = $("#reg-dialog-form").dialog({
           autoOpen: false,
           modal: true,
           buttons: {
-            'Create an account': addUser,
-            Cancel: function () {
-              regDialog.dialog('close');
-            },
+            "Create an account": addUser,
+            Cancel: function() {
+              regDialog.dialog("close");
+            }
           },
-          close: function () {
+          close: function() {
             regForm[0].reset();
-          },
+          }
         });
 
-        regForm = regDialog.find('form').on('submit', function (event) {
+        regForm = regDialog.find("form").on("submit", function(event) {
           event.preventDefault();
           addUser();
         });
-
-        $('#register').on('click', function () {
-          regDialog.dialog('open');
+        
+        $("#register").on("click", function() {
+          regDialog.dialog("open");
         });
 
-        verifyDialog = $('#verify-dialog-form').dialog({
+        verifyDialog = $("#verify-dialog-form").dialog({
           autoOpen: false,
           modal: true,
           buttons: {
-            'Confirm registration': confirmUser,
-            Cancel: function () {
-              verifyDialog.dialog('close');
-            },
+            "Confirm registration": confirmUser,
+            Cancel: function() {
+              verifyDialog.dialog("close");
+            }
           },
-          close: function () {
-            $(this).dialog('close');
-          },
+          close: function() {
+            $(this).dialog("close");
+          }
         });
 
-        regCompleteDialog = $('#registered-message').dialog({
+        regCompleteDialog = $("#registered-message").dialog({
           autoOpen: false,
           modal: true,
           buttons: {
-            Ok: function () {
-              $(this).dialog('close');
-            },
-          },
+            Ok: function() {
+              $(this).dialog("close");
+            }
+          }
         });
 
-        signInDialog = $('#sign-in-form').dialog({
+        signInDialog = $("#sign-in-form").dialog({
           autoOpen: false,
           modal: true,
           buttons: {
-            'Sign in': authenticateUser,
-            Cancel: function () {
-              signInDialog.dialog('close');
-            },
+            "Sign in": authenticateUser,
+            Cancel: function() {
+              signInDialog.dialog("close");
+            }
           },
-          close: function () {
-            $(this).dialog('close');
-          },
+          close: function() {
+            $(this).dialog("close");
+          }
         });
 
-        $('#sign-in').on('click', function () {
-          signInDialog.dialog('open');
+        $("#sign-in").on("click", function() {
+          signInDialog.dialog("open");
         });
 
-        $('#sign-out').on('click', function () {
+        $("#sign-out").on("click", function() {
           signOut();
-        });
+        })
 
         init();
       });
+
     </script>
   </head>
 
@@ -416,10 +426,10 @@ let html = `
           </ul>
         </li>
         <li class="item">
-          <img id="logo" src="https://d2qt42rcwzspd6.cloudfront.net/manning/big-mouth.png" />
+          <img id="logo" src="https://d2qt42rcwzspd6.cloudfront.net/manning/big-mouth.png">
         </li>
         <li class="item">
-          <input id="theme" type="text" size="50" placeholder="enter a theme, eg. cartoon" />
+          <input id="theme" type="text" size="50" placeholder="enter a theme, eg. rick and morty"/>
           <button onclick="searchRestaurants()">Find Restaurants</button>
         </li>
         <li>
@@ -428,11 +438,11 @@ let html = `
             <ul id="restaurantsUl" class="row-container">
               {{#restaurants}}
               <li class="restaurant">
-                <ul class="column-container">
-                  <li class="item restaurant-name">{{name}}</li>
-                  <li class="item restaurant-image">
-                    <img src="{{image}}" />
-                  </li>
+                <ul class="column-container" onclick='placeOrder("{{name}}")'>
+                    <li class="item restaurant-name">{{name}}</li>
+                    <li class="item restaurant-image">
+                      <img src="{{image}}">
+                    </li>
                 </ul>
               </li>
               {{/restaurants}}
@@ -442,29 +452,19 @@ let html = `
       </ul>
     </div>
 
-    <div id="reg-dialog-form" title="Register">
+    <div id="reg-dialog-form" title="Register">       
       <form>
         <fieldset>
           <label for="first-name">First Name</label>
-          <input type="text" id="first-name" class="text ui-widget-content ui-corner-all" />
+          <input type="text" id="first-name" class="text ui-widget-content ui-corner-all">
           <label for="last-name">Last Name</label>
-          <input type="text" id="last-name" class="text ui-widget-content ui-corner-all" />
+          <input type="text" id="last-name" class="text ui-widget-content ui-corner-all">
           <label for="email">Email</label>
-          <input type="text" name="email" id="email" class="text ui-widget-content ui-corner-all" />
+          <input type="text" name="email" id="email" class="text ui-widget-content ui-corner-all">
           <label for="username">Username</label>
-          <input
-            type="text"
-            name="username"
-            id="username"
-            class="text ui-widget-content ui-corner-all"
-          />
+          <input type="text" name="username" id="username" class="text ui-widget-content ui-corner-all">
           <label for="password">Password</label>
-          <input
-            type="password"
-            name="password"
-            id="password"
-            class="text ui-widget-content ui-corner-all"
-          />
+          <input type="password" name="password" id="password" class="text ui-widget-content ui-corner-all">
         </fieldset>
       </form>
     </div>
@@ -472,8 +472,8 @@ let html = `
     <div id="verify-dialog-form" title="Verify">
       <form>
         <fieldset>
-          <label for="verification-code">Verification Code</label>
-          <input type="text" id="verification-code" class="text ui-widget-content ui-corner-all" />
+            <label for="verification-code">Verification Code</label>
+            <input type="text" id="verification-code" class="text ui-widget-content ui-corner-all">
         </fieldset>
       </form>
     </div>
@@ -487,19 +487,17 @@ let html = `
 
     <div id="sign-in-form" title="Sign in">
       <form>
-        <fieldset>
-          <label for="sign-in-username">Username</label>
-          <input type="text" id="sign-in-username" class="text ui-widget-content ui-corner-all" />
-          <label for="sign-in-password">Password</label>
-          <input
-            type="password"
-            id="sign-in-password"
-            class="text ui-widget-content ui-corner-all"
-          />
-        </fieldset>
-      </form>
+          <fieldset>            
+            <label for="sign-in-username">Username</label>
+            <input type="text" id="sign-in-username" class="text ui-widget-content ui-corner-all">
+            <label for="sign-in-password">Password</label>
+            <input type="password" id="sign-in-password" class="text ui-widget-content ui-corner-all">
+          </fieldset>
+        </form>
     </div>
+
   </body>
+
 </html>
 `;
 
@@ -565,6 +563,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       cognitoClientId,
       dayOfWeek,
       restaurants,
+      placeOrderUrl: placeOrderApiRoot,
       searchUrl: `${restaurantsApiRoot}/search`,
     });
     const response: APIGatewayProxyResult = {
